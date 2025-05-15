@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>E-Waste Recycling App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f8f0;
+      color: #2c3e50;
+    }
+    .container {
+      max-width: 400px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .hidden {
+      display: none;
+    }
+    .login-img {
+  display: block;
+  margin: 0 auto 1rem;
+  width: 200px;   /* Increase this value for a larger image */
+  height: auto;   /* Keeps aspect ratio */
+}
+  </style>
+</head>
+<body onload="showScreen('login')">
+    <div class="container hidden" id="login">
+        <img src="intro.PNG" alt="Login Image" class="login-img">
+        <h2>Log In</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="loginUser()">Log In</button>
+        <button onclick="showScreen('signup')">Sign Up</button>
+    </div>
+  <div class="container hidden" id="signup">
+    <h2>Sign Up</h2>
+    <input type="email" id="signupEmail" placeholder="Email">
+    <input type="password" id="signupPassword" placeholder="Password">
+    <button onclick="signupUser()">Create Account</button>
+  </div>
+
+  <div class="container hidden" id="pickups">
+    <h2>Welcome, <span id="userEmail"></span></h2>
+    <h3>Your Pickups</h3>
+    <div id="pickupList"></div>
+    <button onclick="showScreen('enterAddress')">Schedule New Pickup</button>
+  </div>
+
+  <div class="container hidden" id="enterAddress">
+    <h2>Enter Address</h2>
+    <input type="text" id="address" placeholder="Address">
+    <input type="date" id="pickupDate">
+    <button onclick="schedulePickup()">Confirm</button>
+  </div>
+
+  <div class="container hidden" id="scheduled">
+    <h2>Pickup Scheduled</h2>
+    <p>Your e-waste pickup has been scheduled.</p>
+    <button onclick="showScreen('rewards')">View Rewards</button>
+  </div>
+
+  <div class="container hidden" id="rewards">
+    <h2>Rewards</h2>
+    <h3 id="rewardPoints">0 Points</h3>
+    <p>Earn points for each completed pickup.</p>
+    <button onclick="showScreen('pointsEarned')">View History</button>
+  </div>
+
+  <div class="container hidden" id="pointsEarned">
+    <h2>Points Earned</h2>
+    <p>50 Points</p>
+    <p>You’ve earned a 10% discount!</p>
+  </div>
+
+  <script>
+    function showScreen(screenId) {
+      document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+      document.getElementById(screenId).classList.remove('hidden');
+    }
+
+    function signupUser() {
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      if (email && password) {
+        localStorage.setItem(email, password);
+        alert('Account created successfully. Please log in.');
+        showScreen('login');
+      } else {
+        alert('Please enter email and password.');
+      }
+    }
+
+    function loginUser() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const storedPassword = localStorage.getItem(email);
+      if (storedPassword && storedPassword === password) {
+        localStorage.setItem('currentUser', email);
+        document.getElementById('userEmail').textContent = email;
+        loadPickups();
+        showScreen('pickups');
+      } else {
+        alert('Invalid credentials');
+      }
+    }
+
+    function schedulePickup() {
+      const address = document.getElementById('address').value;
+      const date = document.getElementById('pickupDate').value;
+      if (address && date) {
+        const user = localStorage.getItem('currentUser');
+        const pickups = JSON.parse(localStorage.getItem(user + '_pickups') || '[]');
+        pickups.push({ address, date });
+        localStorage.setItem(user + '_pickups', JSON.stringify(pickups));
+
+        let points = parseInt(localStorage.getItem(user + '_points') || '0');
+        points += 50;
+        localStorage.setItem(user + '_points', points);
+        document.getElementById('rewardPoints').textContent = points + ' Points';
+
+        alert(`Pickup scheduled for ${address} on ${date}`);
+        showScreen('scheduled');
+      } else {
+        alert('Please enter both address and date.');
+      }
+    }
+
+    function loadPickups() {
+      const user = localStorage.getItem('currentUser');
+      const pickups = JSON.parse(localStorage.getItem(user + '_pickups') || '[]');
+      const pickupList = document.getElementById('pickupList');
+      pickupList.innerHTML = '';
+      pickups.forEach(p => {
+        const div = document.createElement('div');
+        div.textContent = `${p.date} - ${p.address}`;
+        pickupList.appendChild(div);
+      });
+      const points = localStorage.getItem(user + '_points') || '0';
+      document.getElementById('rewardPoints').textContent = points + ' Points';
+    }
+  </script>
+</body>
+</html>
+
+

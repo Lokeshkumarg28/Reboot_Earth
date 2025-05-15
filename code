@@ -133,7 +133,7 @@
     <section class="cta">
       <h2>Join the Recycling Revolution</h2>
       <p>Download the app or sign up now to get started!</p>
-      <button onclick="window.location.href='APP.html'">Get Started</button>
+      <button onclick="alert('Redirecting to app store or signup...')">Get Started</button>
     </section>
 
     <section class="how-it-works">
